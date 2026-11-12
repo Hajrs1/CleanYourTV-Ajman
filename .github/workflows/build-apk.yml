@@ -1,0 +1,63 @@
+
+name: Build CleanYourTV APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract project ZIP
+        run: |
+          ZIP=$(find . -maxdepth 1 -name 'CleanYourTV-Independent-Source-v20-download.zip' -print -quit)
+          test -n "$ZIP"
+          mkdir source
+          unzip -q "$ZIP" -d source
+          cd source/CleanYourTV-Independent
+          test -f settings.gradle
+          test -d app
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android platform
+        run: sdkmanager 'platforms;android-34' 'build-tools;34.0.0'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Build APK
+        working-directory: source/CleanYourTV-Independent
+        run: gradle --no-daemon assembleDebug
+
+      - name: Verify APK
+        working-directory: source/CleanYourTV-Independent
+        run: |
+          APK=app/build/outputs/apk/debug/app-debug.apk
+          test -s "$APK"
+          "$ANDROID_HOME/build-tools/34.0.0/aapt" dump badging "$APK"
+          sha256sum "$APK"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CleanYourTV-debug-apk
+          path: source/CleanYourTV-Independent/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
