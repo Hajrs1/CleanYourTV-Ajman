@@ -1,4 +1,3 @@
-
 name: Build CleanYourTV APK
 
 on:
@@ -32,13 +31,10 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-       - name: Install Android platform
+      - name: Install Android platform
         run: |
           yes | sdkmanager --licenses
           sdkmanager 'platforms;android-34' 'build-tools;34.0.0'
-
-      - name: Install Android platform
-        run: sdkmanager 'platforms;android-34' 'build-tools;34.0.0'
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
