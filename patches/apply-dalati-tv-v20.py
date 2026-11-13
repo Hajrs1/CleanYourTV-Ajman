@@ -154,5 +154,71 @@ s=s.replace('java.time.LocalTime.now());','java.time.LocalTime.now(ZoneId.of("As
 g= root/"app/build.gradle"
 gs=g.read_text(encoding="utf-8").replace("versionCode 19","versionCode 20").replace("versionName '0.19.0-preview'","versionName '0.20.0-preview'")
 g.write_text(gs,encoding="utf-8")
+
+# Screensaver reference layout and prayer-time labels.
+s=s.replace("private TextView sectionContent, screensaverPrayerView, prayerMainView;", "private TextView sectionContent, screensaverPrayerView, prayerMainView, screensaverCountdownView, mainCountdownView;\\n    private String[] dailyPrayerTimes = new String[]{\\"--:--\\",\\"--:--\\",\\"--:--\\",\\"--:--\\",\\"--:--\\"};",1)
+# The prayer card uses a separate gold circular countdown indicator.
+s=s.replace('''        TextView h=text(title,15,Color.WHITE,true); h.setGravity(Gravity.CENTER); c.addView(h,new LinearLayout.LayoutParams(-1,dp(25)));
+        TextView m=text(main,20,Color.WHITE,true); m.setGravity(Gravity.CENTER); m.setMaxLines(2); c.addView(m,new LinearLayout.LayoutParams(-1,0,1));
+        TextView b=text(sub,13,Color.WHITE,false); b.setGravity(Gravity.CENTER); b.setMaxLines(2); c.addView(b,new LinearLayout.LayoutParams(-1,dp(24)));
+        if(foot!=null&&!foot.isEmpty()){TextView f=text(foot,11,Color.LTGRAY,false);f.setGravity(Gravity.CENTER);c.addView(f);}''','''        if("prayer".equals(section)) {
+            LinearLayout labels=new LinearLayout(this); labels.setOrientation(LinearLayout.VERTICAL); labels.setGravity(Gravity.CENTER);
+            TextView h=text(title,14,Color.WHITE,true); h.setGravity(Gravity.CENTER); labels.addView(h);
+            TextView m=text(main,21,gold,true); m.setGravity(Gravity.CENTER); prayerMainView=m; labels.addView(m);
+            TextView b=text(sub,12,Color.WHITE,false); b.setGravity(Gravity.CENTER); prayerSummary=b; labels.addView(b);
+            c.setOrientation(LinearLayout.HORIZONTAL); c.addView(labels,new LinearLayout.LayoutParams(0,-1,1));
+            TextView ring=text("--:--:--",12,Color.WHITE,true); ring.setGravity(Gravity.CENTER); android.graphics.drawable.GradientDrawable oval=new android.graphics.drawable.GradientDrawable(); oval.setShape(android.graphics.drawable.GradientDrawable.OVAL); oval.setColor(Color.argb(90,8,20,38)); oval.setStroke(dp(3),gold); ring.setBackground(oval); mainCountdownView=ring; c.addView(ring,new LinearLayout.LayoutParams(dp(76),dp(76)));
+        } else {
+            TextView h=text(title,15,Color.WHITE,true); h.setGravity(Gravity.CENTER); c.addView(h,new LinearLayout.LayoutParams(-1,dp(25)));
+            TextView m=text(main,20,Color.WHITE,true); m.setGravity(Gravity.CENTER); m.setMaxLines(2); c.addView(m,new LinearLayout.LayoutParams(-1,0,1));
+            TextView b=text(sub,13,Color.WHITE,false); b.setGravity(Gravity.CENTER); b.setMaxLines(2); c.addView(b,new LinearLayout.LayoutParams(-1,dp(24)));
+            if(foot!=null&&!foot.isEmpty()){TextView f=text(foot,11,Color.LTGRAY,false);f.setGravity(Gravity.CENTER);c.addView(f);}
+        }''',1)
+# Rebuild screensaver with the exact top / lower information strip composition.
+a=s.index('        if(section.equals("screensaver")) {')
+b=s.index('        if(section.equals("barcelona") || section.equals("weather"))',a)
+screen=r'''        if(section.equals("screensaver")) {
+            page.removeAllViews(); page.setPadding(dp(22),dp(10),dp(22),dp(10)); page.setGravity(Gravity.TOP);
+            page.setBackground(new BitmapDrawable(getResources(),BitmapFactory.decodeResource(getResources(),R.drawable.ajman_cinematic)));
+            LinearLayout top=new LinearLayout(this); top.setGravity(Gravity.CENTER_VERTICAL); top.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
+            TextView logo=text("◉  Dalati TV",25,Color.WHITE,true); logo.setShadowLayer(dp(8),0,0,gold); top.addView(logo,new LinearLayout.LayoutParams(0,dp(58),1));
+            TextView dates=text("",14,Color.WHITE,true); dates.setGravity(Gravity.RIGHT|Gravity.CENTER_VERTICAL); screensaverDateView=dates; top.addView(dates,new LinearLayout.LayoutParams(dp(230),dp(58)));
+            TextView time=text("",42,Color.WHITE,true); time.setGravity(Gravity.CENTER); time.setShadowLayer(dp(8),0,dp(3),gold); screensaverClockView=time; top.addView(time,new LinearLayout.LayoutParams(dp(150),dp(58)));
+            page.addView(top,new LinearLayout.LayoutParams(-1,dp(60)));
+            page.addView(new View(this),new LinearLayout.LayoutParams(1,0,1));
+            LinearLayout bottom=new LinearLayout(this); bottom.setGravity(Gravity.CENTER_VERTICAL); bottom.setLayoutDirection(View.LAYOUT_DIRECTION_LTR); bottom.setPadding(dp(5),dp(5),dp(5),dp(5)); bottom.setBackground(roundBackground(Color.argb(125,4,17,33),gold,dp(1)));
+            TextView wifi=text("◉\\nمتصل\\nWi-Fi",13,Color.WHITE,true);wifi.setGravity(Gravity.CENTER);bottom.addView(wifi,new LinearLayout.LayoutParams(0,-1,0.65f));
+            TextView weather=text("☁  "+weatherSnapshot,15,Color.WHITE,true);weather.setGravity(Gravity.CENTER);screensaverWeatherView=weather;bottom.addView(weather,new LinearLayout.LayoutParams(0,-1,1.1f));
+            TextView ring=text("--:--:--",13,Color.WHITE,true);ring.setGravity(Gravity.CENTER);android.graphics.drawable.GradientDrawable oval=new android.graphics.drawable.GradientDrawable();oval.setShape(android.graphics.drawable.GradientDrawable.OVAL);oval.setColor(Color.argb(100,5,18,35));oval.setStroke(dp(3),gold);ring.setBackground(oval);screensaverCountdownView=ring;bottom.addView(ring,new LinearLayout.LayoutParams(dp(84),dp(84)));
+            LinearLayout next=new LinearLayout(this);next.setOrientation(LinearLayout.VERTICAL);next.setGravity(Gravity.CENTER);next.setBackground(roundBackground(Color.argb(175,7,20,38),gold,dp(1)));
+            TextView nt=text("الصلاة القادمة",12,Color.WHITE,true);nt.setGravity(Gravity.CENTER);next.addView(nt);
+            screensaverPrayerView=text("العشاء",22,gold,true);screensaverPrayerView.setGravity(Gravity.CENTER);next.addView(screensaverPrayerView);
+            TextView nextTime=text("--:--",15,Color.WHITE,true);nextTime.setGravity(Gravity.CENTER);next.addView(nextTime);
+            bottom.addView(next,new LinearLayout.LayoutParams(0,dp(88),1.05f));
+            String[] names={"الفجر","الظهر","العصر","المغرب","العشاء"};
+            int[] order={4,3,2,1,0};
+            for(int index:order){LinearLayout cell=new LinearLayout(this);cell.setOrientation(LinearLayout.VERTICAL);cell.setGravity(Gravity.CENTER);
+                TextView n=text("☼  "+names[index],12,Color.WHITE,true);n.setGravity(Gravity.CENTER);
+                TextView t=text(dailyPrayerTimes[index],14,Color.WHITE,true);t.setGravity(Gravity.CENTER);cell.addView(n);cell.addView(t);
+                bottom.addView(cell,new LinearLayout.LayoutParams(0,-1,0.62f));}
+            page.addView(bottom,new LinearLayout.LayoutParams(-1,dp(104)));
+            activePage=page;updateClock();if(screensaverClockView!=null)screensaverClockView.setText(clockView.getText());if(screensaverDateView!=null)screensaverDateView.setText(dateView.getText());
+            if(screensaverWeatherView!=null)screensaverWeatherView.setText("☁  "+weatherSnapshot);updatePrayerCard();page.setKeepScreenOn(true);
+            handler.removeCallbacks(screensaverTicker);handler.post(screensaverTicker);
+        }
+'''
+s=s[:a]+screen+s[b:]
+# Read the five prayer times only from the official page text; unknown values stay --:--.
+needle='''                Matcher m=p.matcher(body);
+                if(m.find()) {'''
+rep='''                Matcher m=p.matcher(body);
+                String[] prayerPatterns={"Fajr","Dhuhr|Zuhr","Asr","Maghrib","Isha"};
+                for(int i=0;i<prayerPatterns.length;i++){Matcher pt=Pattern.compile("(?i)"+prayerPatterns[i]+"\\\\\\\\s*[:\\\\\\\\-]?\\\\\\\\s*(\\\\\\\\d{1,2}:\\\\\\\\d{2})").matcher(body);if(pt.find())dailyPrayerTimes[i]=pt.group(1);}
+                if(m.find()) {'''
+s=s.replace(needle,rep,1)
+s=s.replace('''        if(prayerSummary!=null) prayerSummary.setText(countdown);''','''        if(prayerSummary!=null) prayerSummary.setText(countdown);
+        if(mainCountdownView!=null) mainCountdownView.setText(countdown);
+        if(screensaverCountdownView!=null) screensaverCountdownView.setText(countdown);''',1)
+
 java.write_text(s,encoding="utf-8")
 print("Dalati TV v20 responsive cinematic dashboard, eight app tiles, compact icon navigation and internal search applied.")
