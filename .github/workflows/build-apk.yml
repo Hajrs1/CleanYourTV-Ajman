@@ -1,4 +1,4 @@
-name: Build Dalati TV APK
+name: Build Dalati TV APK v18
 
 on:
   workflow_dispatch:
@@ -15,10 +15,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Extract Dalati TV v28 source
+      - name: Extract and patch Dalati TV v18 source
         run: |
           set -euo pipefail
-          ZIP="CleanYourTV-DalatiTV-v28-Verified-CI-Source.zip"
+          ZIP="CleanYourTV-DalatiTV-v30-Verified-CI-Source.zip"
           test -s "$ZIP"
           mkdir -p source
           unzip -q "$ZIP" -d source
@@ -27,6 +27,7 @@ jobs:
           test -f source/CleanYourTV-Independent/app/src/main/AndroidManifest.xml
           test -f source/CleanYourTV-Independent/app/src/main/java/ae/cleanyourtv/independent/MainActivity.java
           test -s source/CleanYourTV-Independent/app/src/main/res/drawable-nodpi/ajman_cinematic.jpg
+          python3 patches/apply-dalati-tv-v18.py
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -73,7 +74,7 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Dalati-TV-v28-debug-APK
+          name: Dalati-TV-v18-debug-APK
           path: |
             source/CleanYourTV-Independent/app/build/outputs/apk/debug/app-debug.apk
             source/CleanYourTV-Independent/app/build/outputs/apk/debug/SHA256SUMS.txt
