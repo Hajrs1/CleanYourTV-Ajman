@@ -1,4 +1,4 @@
-name: Build Dalati TV APK v20
+name: Build Dalati TV APK v21
 
 on:
   workflow_dispatch:
@@ -29,6 +29,7 @@ jobs:
           test -s source/CleanYourTV-Independent/app/src/main/res/drawable-nodpi/ajman_cinematic.jpg
           python3 patches/apply-dalati-tv-v18.py
           python3 patches/apply-dalati-tv-v20.py
+          python3 patches/apply-dalati-tv-v21.py
 
       - name: Set up Java
         uses: actions/setup-java@v4
