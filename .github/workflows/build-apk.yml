@@ -15,10 +15,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Extract Dalati TV v27 source
+      - name: Extract Dalati TV v28 source
         run: |
           set -euo pipefail
-          ZIP="CleanYourTV-DalatiTV-v27-Verified-CI-Source.zip"
+          ZIP="CleanYourTV-DalatiTV-v28-Verified-CI-Source.zip"
           test -s "$ZIP"
           mkdir -p source
           unzip -q "$ZIP" -d source
@@ -73,7 +73,7 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Dalati-TV-v27-debug-APK
+          name: Dalati-TV-v28-debug-APK
           path: |
             source/CleanYourTV-Independent/app/build/outputs/apk/debug/app-debug.apk
             source/CleanYourTV-Independent/app/build/outputs/apk/debug/SHA256SUMS.txt
