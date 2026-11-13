@@ -224,6 +224,7 @@ s=s.replace('''        if(prayerSummary!=null) prayerSummary.setText(countdown);
 # Correct Java escape depth in the generated prayer parser and multiline Wi-Fi label.
 s=s.replace(r'\\\\s*[:\\\\-]?\\\\s*', r'\\s*[:\\-]?\\s*')
 s=s.replace(r'◉\\nمتصل\\nWi-Fi', r'◉\nمتصل\nWi-Fi')
+s=s.replace(r'\\\\d', r'\\d')
 s=s.replace('screensaverPrayerView.setText("۞  "+nextPrayerLabel+" • "+countdown);','screensaverPrayerView.setText(nextPrayerLabel);')
 
 java.write_text(s,encoding="utf-8")
