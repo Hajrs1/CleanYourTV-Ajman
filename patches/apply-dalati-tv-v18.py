@@ -11,6 +11,14 @@ old = r'Pattern.compile("(?i)NextPrayer\\s*:\\s*(fajr|zuhr|dhuhr|asr|maghrib|ish
 new = r'Pattern.compile("(?i)Next\\s*prayer\\s*:\\s*(fajr|zuhr|dhuhr|asr|maghrib|isha)\\s+(\\d{1,2}:\\d{2}:\\d{2})")'
 if old in s: s = s.replace(old, new, 1)
 
+# Keep the TV display awake while the app's own idle timer manages its screensaver.
+for before, after in [
+    ("        super.onCreate(state);\\n", "        super.onCreate(state);\\n        getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);\\n"),
+    ("        root.setOrientation(LinearLayout.VERTICAL);\\n", "        root.setOrientation(LinearLayout.VERTICAL);\\n        root.setKeepScreenOn(true);\\n"),
+    ('        LinearLayout page = new LinearLayout(this); page.setOrientation(LinearLayout.VERTICAL);', '        LinearLayout page = new LinearLayout(this); page.setKeepScreenOn(true); page.setOrientation(LinearLayout.VERTICAL);')
+]:
+    if before in s: s = s.replace(before, after, 1)
+
 # Correct the fixed-app tiles: resolve the real launcher activity by package OR localized app label,
 # then load the activity icon. This also handles Shahid when its installed package differs.
 start = s.index("    private void appTile(")
