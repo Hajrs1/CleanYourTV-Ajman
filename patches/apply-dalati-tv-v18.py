@@ -30,6 +30,13 @@ if old not in s:
     raise SystemExit("Section page insertion point not found.")
 s = s.replace(old, new, 1)
 
+# The embedded official-authority WebView is initialized in render(); the old onCreate call
+# referenced a method that does not exist in this source archive and prevented compilation.
+old_call = "loadWeather(); loadOfficialPrayerData();"
+if old_call not in s:
+    raise SystemExit("Expected obsolete onCreate call not found.")
+s = s.replace(old_call, "loadWeather();", 1)
+
 java.write_text(s, encoding="utf-8")
 
 g = gradle.read_text(encoding="utf-8")
