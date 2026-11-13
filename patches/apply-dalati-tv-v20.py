@@ -156,7 +156,7 @@ gs=g.read_text(encoding="utf-8").replace("versionCode 19","versionCode 20").repl
 g.write_text(gs,encoding="utf-8")
 
 # Screensaver reference layout and prayer-time labels.
-s=s.replace("private TextView sectionContent, screensaverPrayerView, prayerMainView;", "private TextView sectionContent, screensaverPrayerView, prayerMainView, screensaverCountdownView, mainCountdownView;\\n    private String[] dailyPrayerTimes = new String[]{\\"--:--\\",\\"--:--\\",\\"--:--\\",\\"--:--\\",\\"--:--\\"};",1)
+s=s.replace("private TextView sectionContent, screensaverPrayerView, prayerMainView;", 'private TextView sectionContent, screensaverPrayerView, prayerMainView, screensaverCountdownView, mainCountdownView;\n    private String[] dailyPrayerTimes = new String[]{"--:--","--:--","--:--","--:--","--:--"};',1)
 # The prayer card uses a separate gold circular countdown indicator.
 s=s.replace('''        TextView h=text(title,15,Color.WHITE,true); h.setGravity(Gravity.CENTER); c.addView(h,new LinearLayout.LayoutParams(-1,dp(25)));
         TextView m=text(main,20,Color.WHITE,true); m.setGravity(Gravity.CENTER); m.setMaxLines(2); c.addView(m,new LinearLayout.LayoutParams(-1,0,1));
