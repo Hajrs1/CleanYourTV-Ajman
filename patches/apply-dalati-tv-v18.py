@@ -127,7 +127,7 @@ methods = r'''    private void renderSettings(LinearLayout page, String title) {
 if marker not in s: raise SystemExit("Launch intent marker missing")
 s = s.replace(marker, methods + marker, 1)
 s = s.replace("handler.postDelayed(idleScreensaver, 3 * 60 * 1000);",
-              "handler.postDelayed(idleScreensaver, getPreferences(MODE_PRIVATE).getInt(\\"screensaver_delay_minutes\\",3) * 60 * 1000L);", 1)
+              "handler.postDelayed(idleScreensaver, getPreferences(MODE_PRIVATE).getInt('screensaver_delay_minutes',3) * 60 * 1000L);", 1)
 # Fix obsolete call from the archived source that otherwise fails compilation.
 s = s.replace("loadWeather(); loadOfficialPrayerData();", "loadWeather();", 1)
 java.write_text(s, encoding="utf-8")
