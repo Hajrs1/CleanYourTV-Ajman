@@ -1,9 +1,9 @@
-name: Build CleanYourTV APK
+name: Build Dalati TV APK
 
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [ dalati-tv-v26-preview ]
 
 permissions:
   contents: read
@@ -15,28 +15,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Extract project ZIP
+      - name: Extract Dalati TV v27 source
         run: |
-          ZIP=$(find . -maxdepth 1 -name 'CleanYourTV-Independent-Source-v20-download.zip' -print -quit)
-          test -n "$ZIP"
-          mkdir source
+          set -euo pipefail
+          ZIP="CleanYourTV-DalatiTV-v27-Verified-CI-Source.zip"
+          test -s "$ZIP"
+          mkdir -p source
           unzip -q "$ZIP" -d source
-          cd source/CleanYourTV-Independent
-          test -f settings.gradle
-          test -d app
+          test -f source/CleanYourTV-Independent/settings.gradle
+          test -f source/CleanYourTV-Independent/app/build.gradle
+          test -f source/CleanYourTV-Independent/app/src/main/AndroidManifest.xml
+          test -f source/CleanYourTV-Independent/app/src/main/java/ae/cleanyourtv/independent/MainActivity.java
+          test -s source/CleanYourTV-Independent/app/src/main/res/drawable-nodpi/ajman_cinematic.jpg
 
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
-          
+
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
-        with:
-          packages: 'platform-tools'
-          
-      - name: Install Android platform
+
+      - name: Install Android platform and build tools
         run: |
           yes | sdkmanager --licenses
           sdkmanager 'platforms;android-34' 'build-tools;34.0.0'
@@ -48,19 +49,29 @@ jobs:
 
       - name: Build APK
         working-directory: source/CleanYourTV-Independent
-        run: gradle --no-daemon assembleDebug
+        run: gradle --no-daemon --stacktrace assembleDebug
 
-      - name: Verify APK
+      - name: Verify APK package and launcher manifest
         working-directory: source/CleanYourTV-Independent
+        shell: bash
         run: |
+          set -euo pipefail
           APK=app/build/outputs/apk/debug/app-debug.apk
           test -s "$APK"
-          "$ANDROID_HOME/build-tools/34.0.0/aapt" dump badging "$APK"
-          sha256sum "$APK"
+          AAPT="$ANDROID_HOME/build-tools/34.0.0/aapt"
+          "$AAPT" dump badging "$APK" | tee /tmp/apk-badging.txt
+          grep -Fq "package: name='ae.cleanyourtv.independent'" /tmp/apk-badging.txt
+          "$AAPT" dump xmltree "$APK" AndroidManifest.xml > /tmp/apk-manifest.txt
+          grep -Fq 'android.intent.category.HOME' /tmp/apk-manifest.txt
+          grep -Fq 'android.intent.category.DEFAULT' /tmp/apk-manifest.txt
+          grep -Fq 'android.intent.category.LEANBACK_LAUNCHER' /tmp/apk-manifest.txt
+          sha256sum "$APK" | tee app/build/outputs/apk/debug/SHA256SUMS.txt
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: CleanYourTV-debug-apk
-          path: source/CleanYourTV-Independent/app/build/outputs/apk/debug/app-debug.apk
+          name: Dalati-TV-v27-debug-APK
+          path: |
+            source/CleanYourTV-Independent/app/build/outputs/apk/debug/app-debug.apk
+            source/CleanYourTV-Independent/app/build/outputs/apk/debug/SHA256SUMS.txt
           if-no-files-found: error
