@@ -143,7 +143,7 @@ s=s.replace('''        if (section.equals("settings")) { renderSettings(page, ti
             setContentView(page);resetIdleTimer();q.requestFocus();return;
         }
         if (section.equals("settings")) { renderSettings(page, title);''',1)
-s=s.replace('case "apps": title="التطبيقات";', 'case "guide": title="دليل البرامج"; body="دليل Dalati TV\\\\n\\\\nاختر تطبيق البث من صف التطبيقات لعرض القنوات والبرامج المتاحة فيه."; break;\\n            case "search": title="البحث عن تطبيق"; body="اكتب اسم التطبيق المثبت للعثور عليه."; break;\\n            case "apps": title="التطبيقات";',1)
+s=s.replace('case "apps": title="التطبيقات";', 'case "guide": title="دليل البرامج"; body="دليل Dalati TV\\n\\nاختر تطبيق البث من صف التطبيقات لعرض القنوات والبرامج المتاحة فيه."; break;' + chr(10) + '            case "search": title="البحث عن تطبيق"; body="اكتب اسم التطبيق المثبت للعثور عليه."; break;' + chr(10) + '            case "apps": title="التطبيقات";',1)
 s=s.replace('''        String value="الصلاة القادمة: "+nextPrayerLabel+"\\\\nالوقت المتبقي  "+countdown;
         if(prayerSummary!=null) prayerSummary.setText(value);''','''        if(prayerMainView!=null) prayerMainView.setText(nextPrayerLabel);
         if(prayerSummary!=null) prayerSummary.setText(countdown);''',1)
