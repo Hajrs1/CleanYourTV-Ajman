@@ -220,5 +220,11 @@ s=s.replace('''        if(prayerSummary!=null) prayerSummary.setText(countdown);
         if(mainCountdownView!=null) mainCountdownView.setText(countdown);
         if(screensaverCountdownView!=null) screensaverCountdownView.setText(countdown);''',1)
 
+
+# Correct Java escape depth in the generated prayer parser and multiline Wi-Fi label.
+s=s.replace(r'\\\\s*[:\\\\-]?\\\\s*', r'\\s*[:\\-]?\\s*')
+s=s.replace(r'◉\\nمتصل\\nWi-Fi', r'◉\nمتصل\nWi-Fi')
+s=s.replace('screensaverPrayerView.setText("۞  "+nextPrayerLabel+" • "+countdown);','screensaverPrayerView.setText(nextPrayerLabel);')
+
 java.write_text(s,encoding="utf-8")
 print("Dalati TV v20 responsive cinematic dashboard, eight app tiles, compact icon navigation and internal search applied.")
