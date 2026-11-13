@@ -56,6 +56,39 @@ jobs:
         working-directory: source/CleanYourTV-Independent
         run: gradle --no-daemon --stacktrace assembleDebug
 
+      - name: Android TV emulator smoke test
+        uses: reactivecircus/android-emulator-runner@v2
+        continue-on-error: true
+        with:
+          api-level: 30
+          target: google_apis
+          arch: x86_64
+          profile: tv_1080p
+          disable-animations: true
+          emulator-options: -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect
+          script: |
+            set -euo pipefail
+            APK=source/CleanYourTV-Independent/app/build/outputs/apk/debug/app-debug.apk
+            adb install -r "$APK"
+            adb shell am start -n ae.cleanyourtv.independent/.MainActivity
+            sleep 12
+            adb shell pidof ae.cleanyourtv.independent
+            adb shell screencap -p /sdcard/dalati-home.png
+            adb pull /sdcard/dalati-home.png dalati-home-emulator.png
+            adb shell input keyevent 20
+            adb shell input keyevent 22
+            adb shell input keyevent 23
+            sleep 2
+            adb logcat -d -t 2000 | grep -E 'FATAL EXCEPTION|AndroidRuntime' && exit 1 || true
+
+      - name: Upload Android TV emulator screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Dalati-TV-v20-emulator-smoke
+          path: dalati-home-emulator.png
+          if-no-files-found: ignore
+
       - name: Verify APK package and launcher manifest
         working-directory: source/CleanYourTV-Independent
         shell: bash
