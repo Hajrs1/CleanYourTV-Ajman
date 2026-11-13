@@ -1,4 +1,4 @@
-name: Build Dalati TV APK v19
+name: Build Dalati TV APK v20
 
 on:
   workflow_dispatch:
@@ -28,6 +28,7 @@ jobs:
           test -f source/CleanYourTV-Independent/app/src/main/java/ae/cleanyourtv/independent/MainActivity.java
           test -s source/CleanYourTV-Independent/app/src/main/res/drawable-nodpi/ajman_cinematic.jpg
           python3 patches/apply-dalati-tv-v18.py
+          python3 patches/apply-dalati-tv-v20.py
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -74,7 +75,7 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Dalati-TV-v19-debug-APK
+          name: Dalati-TV-v20-debug-APK
           path: |
             source/CleanYourTV-Independent/app/build/outputs/apk/debug/app-debug.apk
             source/CleanYourTV-Independent/app/build/outputs/apk/debug/SHA256SUMS.txt
@@ -83,6 +84,6 @@ jobs:
       - name: Upload patched source for full review
         uses: actions/upload-artifact@v4
         with:
-          name: Dalati-TV-v19-patched-source-review
+          name: Dalati-TV-v20-patched-source-review
           path: source/CleanYourTV-Independent/
           if-no-files-found: error
