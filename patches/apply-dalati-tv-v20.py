@@ -4,6 +4,7 @@ import re
 root = Path("source/CleanYourTV-Independent")
 java = root / "app/src/main/java/ae/cleanyourtv/independent/MainActivity.java"
 s = java.read_text(encoding="utf-8")
+s = s.replace("private TextView sectionContent, screensaverPrayerView;", "private TextView sectionContent, screensaverPrayerView, prayerMainView;", 1)
 
 def replace_method(source, signature, next_signature, replacement):
     a = source.index(signature)
@@ -31,7 +32,7 @@ s = replace_method(s, "    private void render() {", "    private LinearLayout c
 
         LinearLayout info=new LinearLayout(this); info.setOrientation(LinearLayout.HORIZONTAL); info.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
         LinearLayout weather=refCard(info,"☁  الطقس","26°","عجمان","سماء صافية","weather",1);
-        weatherValue=(TextView)weather.getChildAt(1); weatherExtra=(TextView)weather.getChildAt(2);
+        weatherValue=(TextView)weather.getChildAt(1); weatherExtra=(TextView)weather.getChildAt(3);
         LinearLayout quote=refCard(info,"۞  حديث اليوم","مَنْ كان يؤمن بالله واليوم الآخر فليقل خيراً أو ليصمت","رواه البخاري ومسلم","","adhkar",1);
         LinearLayout barca=refCard(info,"⚽  برشلونة × فياريال","المباراة القادمة","جارٍ تحميل الموعد","","barcelona",1);
         barcelonaSummary=(TextView)barca.getChildAt(2);
