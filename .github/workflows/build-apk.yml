@@ -68,7 +68,6 @@ jobs:
           emulator-options: -no-window -no-audio -no-boot-anim -no-snapshot -wipe-data -memory 4096 -gpu swiftshader_indirect
           script: |
             set -euo pipefail
-            APK=source/CleanYourTV-Independent/app/build/outputs/apk/debug/app-debug.apk
             adb wait-for-device
             for attempt in $(seq 1 12); do
               if adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' | grep -q '^1
@@ -175,7 +174,7 @@ jobs:
           path: source/CleanYourTV-Independent/
           if-no-files-found: error
 
-            adb install -r "$APK"
+            adb install -r source/CleanYourTV-Independent/app/build/outputs/apk/debug/app-debug.apk
             adb shell am start -n ae.cleanyourtv.independent/.MainActivity
             sleep 12
             adb shell pidof ae.cleanyourtv.independent
