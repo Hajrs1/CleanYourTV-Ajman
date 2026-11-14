@@ -35,6 +35,7 @@ method = r'''    private void readOfficialPrayerPage() {
                     nextPrayerLabel = arabicPrayerName(m.group(1));
                     String[] parts = m.group(2).split(":");
                     prayerRemainingSeconds = Integer.parseInt(parts[0])*3600L + Integer.parseInt(parts[1])*60L + Integer.parseInt(parts[2]);
+                    android.util.Log.i("DalatiPrayer","Countdown parsed: prayer="+nextPrayerLabel+" seconds="+prayerRemainingSeconds);
                     updatePrayerCard();
                     return;
                 }
@@ -92,10 +93,13 @@ method = r'''    private void readOfficialPrayerPage() {
                     nextPrayerLabel = arabicLabels[bestIndex];
                     prayerRemainingSeconds = best;
                     updatePrayerCard();
-                } else if (prayerSummary != null && prayerRemainingSeconds < 0) {
-                    prayerSummary.setText("بانتظار مواقيت الصلاة الرسمية من الهيئة");
+                } else {
+                    android.util.Log.w("DalatiPrayer","No supported prayer countdown or timetable pattern found; bodyLength="+body.length());
+                    if (prayerSummary != null && prayerRemainingSeconds < 0)
+                        prayerSummary.setText("بانتظار مواقيت الصلاة الرسمية من الهيئة");
                 }
             } catch(Exception ignored) {
+                android.util.Log.e("DalatiPrayer","Prayer parsing exception",ignored);
                 if (prayerSummary != null && prayerRemainingSeconds < 0)
                     prayerSummary.setText("جارٍ تحميل مواقيت الصلاة الرسمية…");
             }
@@ -109,6 +113,9 @@ s=s.replace('prayerDataWebView.loadUrl("https://www.awqaf.ae/?lang=en");',
             'prayerDataWebView.loadUrl("https://www.awqaf.gov.ae/?lang=en");', 1)
 s=s.replace('''        prayerDataWebView.setWebViewClient(new android.webkit.WebViewClient(){@Override public void onPageFinished(android.webkit.WebView v,String u){readOfficialPrayerPage();}});''',
 '''        prayerDataWebView.setWebViewClient(new android.webkit.WebViewClient(){
+            @Override public void onPageStarted(android.webkit.WebView v,String u,android.graphics.Bitmap icon){
+                android.util.Log.i("DalatiPrayer","AWQAF page started: "+u);
+            }
             @Override public void onPageFinished(android.webkit.WebView v,String u){
                 android.util.Log.i("DalatiPrayer","AWQAF page finished: "+u);
                 readOfficialPrayerPage();
@@ -116,8 +123,23 @@ s=s.replace('''        prayerDataWebView.setWebViewClient(new android.webkit.Web
             @Override public void onReceivedError(android.webkit.WebView v, android.webkit.WebResourceRequest req, android.webkit.WebResourceError err){
                 if(req.isForMainFrame()) android.util.Log.e("DalatiPrayer","AWQAF load error: "+req.getUrl()+" code="+err.getErrorCode()+" "+err.getDescription());
             }
+            @Override public void onReceivedHttpError(android.webkit.WebView v,android.webkit.WebResourceRequest req,android.webkit.WebResourceResponse response){
+                if(req.isForMainFrame()) android.util.Log.e("DalatiPrayer","AWQAF HTTP error: "+req.getUrl()+" status="+response.getStatusCode()+" "+response.getReasonPhrase());
+            }
+            @Override public void onReceivedSslError(android.webkit.WebView v,android.webkit.SslErrorHandler handler,android.net.http.SslError error){
+                android.util.Log.e("DalatiPrayer","AWQAF SSL error: "+error);
+                handler.cancel();
+            }
+        });
+        prayerDataWebView.setWebChromeClient(new android.webkit.WebChromeClient(){
+            @Override public boolean onConsoleMessage(android.webkit.ConsoleMessage message){
+                android.util.Log.i("DalatiPrayer","AWQAF JS console: "+message.message()+" line="+message.lineNumber());
+                return true;
+            }
         });''',1)
-s=s.replace('''                body = westernDigits(body).replace('\\u00a0', ' ');''',
+s=s.replace('''                body = westernDigits(body).replace('\\u00a0', ' ');
+                android.util.Log.i("DalatiPrayer","AWQAF body received length="+body.length());
+                if(body.length()>0) android.util.Log.i("DalatiPrayer","AWQAF body sample="+body.substring(0,Math.min(900,body.length())).replace('\\n',' '));''',
 '''                body = westernDigits(body).replace('\\u00a0', ' ');
                 android.util.Log.i("DalatiPrayer","AWQAF body length="+body.length()+" sample="+body.substring(0,Math.min(700,body.length())).replace('\\n',' '));''',1)
 s=s.replace('''            } catch(Exception ignored) {
@@ -126,6 +148,7 @@ s=s.replace('''            } catch(Exception ignored) {
                 android.util.Log.e("DalatiPrayer","Prayer parse exception",ignored);
                 if (prayerSummary != null && prayerRemainingSeconds < 0)''',1)
 s=s.replace('''            } catch(Exception e) { runOnUiThread(() -> {
+                android.util.Log.e("DalatiWeather","Open-Meteo request failed",e);
                 weatherSnapshot = "الطقس في عجمان غير متاح حاليًا";''',
 '''            } catch(Exception e) { android.util.Log.e("DalatiWeather","Open-Meteo request failed",e); runOnUiThread(() -> {
                 weatherSnapshot = "الطقس في عجمان غير متاح حاليًا";''',1)
