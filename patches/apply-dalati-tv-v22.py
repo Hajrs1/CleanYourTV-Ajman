@@ -202,39 +202,7 @@ s=s.replace('root.addView(header,new LinearLayout.LayoutParams(-1,dp(58)));\\n\\
 s=s.replace('root.addView(info,new LinearLayout.LayoutParams(-1,dp(220)));',
             'root.addView(info,new LinearLayout.LayoutParams(-1,dp(170)));',1)
 
-# Use the exact app-tile artwork cropped from the supplied reference image.
-old_icons = """        ImageView image=new ImageView(this);image.setScaleType(ImageView.ScaleType.FIT_CENTER);boolean found=false;
-        if(!"apps".equals(packageName))try{ResolveInfo ri=findAppInfo(packageName,label);if(ri!=null){image.setImageDrawable(ri.loadIcon(getPackageManager()));found=true;}else{image.setImageDrawable(getPackageManager().getApplicationIcon(packageName));found=true;}}catch(Exception ignored){}
-        if(found)tile.addView(image,new LinearLayout.LayoutParams(dp(72),dp(72)));
-        else{TextView g=text(fallbackIcon,38,Color.WHITE,true);g.setGravity(Gravity.CENTER);tile.addView(g,new LinearLayout.LayoutParams(dp(72),dp(72)));}
-"""
-new_icons = """        ImageView image=new ImageView(this);image.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        int iconRes=0;
-        if("com.google.android.youtube".equals(packageName)) iconRes=R.drawable.app_youtube;
-        else if("com.netflix.ninja".equals(packageName)) iconRes=R.drawable.app_netflix;
-        else if("com.disney.disneyplus".equals(packageName)) iconRes=R.drawable.app_disney;
-        else if("com.amazon.amazonvideo.livingroom".equals(packageName)) iconRes=R.drawable.app_prime;
-        else if("com.mbc.shahid".equals(packageName)) iconRes=R.drawable.app_shahid;
-        else if("com.spotify.tv.android".equals(packageName)) iconRes=R.drawable.app_spotify;
-        else if("com.android.vending".equals(packageName)) iconRes=R.drawable.app_googleplay;
-        else if("apps".equals(packageName)) iconRes=R.drawable.app_all;
-        if(iconRes!=0) image.setImageResource(iconRes);
-        else { TextView g=text(fallbackIcon,38,Color.WHITE,true);g.setGravity(Gravity.CENTER);tile.addView(g,new LinearLayout.LayoutParams(dp(72),dp(72))); }
-        if(iconRes!=0) tile.addView(image,new LinearLayout.LayoutParams(dp(112),dp(100)));
-"""
-if old_icons not in s: raise SystemExit("Original app icon block did not match exactly")
-s=s.replace(old_icons,new_icons,1)
 
-# Install reference-matched background and app tiles from repository assets.
-assets = Path("assets/dalati_tv")
-res = root / "app/src/main/res/drawable-nodpi"
-res.mkdir(parents=True, exist_ok=True)
-legacy_bg = res / "ajman_cinematic.jpg"
-if legacy_bg.exists(): legacy_bg.unlink()
-for name in ["ajman_cinematic.png","app_youtube.png","app_netflix.png","app_disney.png","app_prime.png","app_shahid.png","app_spotify.png","app_googleplay.png","app_all.png"]:
-    source = assets / name
-    if not source.is_file(): raise SystemExit("Missing reference asset: " + str(source))
-    (res / name).write_bytes(source.read_bytes())
 java.write_text(s, encoding="utf-8")
 
 gradle = root / "app/build.gradle"
