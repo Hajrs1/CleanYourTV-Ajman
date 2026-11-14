@@ -107,6 +107,29 @@ s=s[:a]+method+s[b:]
 # Request the official English view explicitly, while parser supports Arabic if the server redirects.
 s=s.replace('prayerDataWebView.loadUrl("https://www.awqaf.ae/?lang=en");',
             'prayerDataWebView.loadUrl("https://www.awqaf.gov.ae/?lang=en");', 1)
+s=s.replace('''        prayerDataWebView.setWebViewClient(new android.webkit.WebViewClient(){@Override public void onPageFinished(android.webkit.WebView v,String u){readOfficialPrayerPage();}});''',
+'''        prayerDataWebView.setWebViewClient(new android.webkit.WebViewClient(){
+            @Override public void onPageFinished(android.webkit.WebView v,String u){
+                android.util.Log.i("DalatiPrayer","AWQAF page finished: "+u);
+                readOfficialPrayerPage();
+            }
+            @Override public void onReceivedError(android.webkit.WebView v, android.webkit.WebResourceRequest req, android.webkit.WebResourceError err){
+                if(req.isForMainFrame()) android.util.Log.e("DalatiPrayer","AWQAF load error: "+req.getUrl()+" code="+err.getErrorCode()+" "+err.getDescription());
+            }
+        });''',1)
+s=s.replace('''                body = westernDigits(body).replace('\\u00a0', ' ');''',
+'''                body = westernDigits(body).replace('\\u00a0', ' ');
+                android.util.Log.i("DalatiPrayer","AWQAF body length="+body.length()+" sample="+body.substring(0,Math.min(700,body.length())).replace('\\n',' '));''',1)
+s=s.replace('''            } catch(Exception ignored) {
+                if (prayerSummary != null && prayerRemainingSeconds < 0)''',
+'''            } catch(Exception ignored) {
+                android.util.Log.e("DalatiPrayer","Prayer parse exception",ignored);
+                if (prayerSummary != null && prayerRemainingSeconds < 0)''',1)
+s=s.replace('''            } catch(Exception e) { runOnUiThread(() -> {
+                weatherSnapshot = "الطقس في عجمان غير متاح حاليًا";''',
+'''            } catch(Exception e) { android.util.Log.e("DalatiWeather","Open-Meteo request failed",e); runOnUiThread(() -> {
+                weatherSnapshot = "الطقس في عجمان غير متاح حاليًا";''',1)
+s=s.replace('section.equals("weather")?36:24','section.equals("weather")?20:24',1)
 
 java.write_text(s, encoding="utf-8")
 
