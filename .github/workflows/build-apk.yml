@@ -69,7 +69,7 @@ jobs:
           emulator-options: -no-window -no-audio -no-boot-anim -no-snapshot -wipe-data -memory 4096 -gpu swiftshader_indirect
           script: |
             set -euo pipefail
-            APK="source/CleanYourTV-Independent/app/build/outputs/apk/debug/app-debug.apk"
+            APK="$GITHUB_WORKSPACE/source/CleanYourTV-Independent/app/build/outputs/apk/debug/app-debug.apk"
             ADB="${ANDROID_HOME}/platform-tools/adb"
             test -s "$APK"
             "$ADB" start-server
@@ -102,9 +102,9 @@ jobs:
             "$ADB" shell am start -W -n ae.cleanyourtv.independent/.MainActivity
             sleep 15
             "$ADB" shell pidof ae.cleanyourtv.independent
-            "$ADB" exec-out screencap -p > dalati-home-emulator.png
-            test -s dalati-home-emulator.png
-            file dalati-home-emulator.png
+            "$ADB" exec-out screencap -p > "$GITHUB_WORKSPACE/dalati-home-emulator.png"
+            test -s "$GITHUB_WORKSPACE/dalati-home-emulator.png"
+            file "$GITHUB_WORKSPACE/dalati-home-emulator.png"
 
       - name: Upload Android TV emulator screenshot
         if: always() && hashFiles('dalati-home-emulator.png') != ''
