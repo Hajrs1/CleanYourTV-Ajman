@@ -67,21 +67,47 @@ jobs:
           profile: tv_1080p
           disable-animations: false
           emulator-options: -no-window -no-audio -no-boot-anim -no-snapshot -wipe-data -memory 4096 -gpu swiftshader_indirect
-          script: >-
-            set -euo pipefail &&
-            test -s source/CleanYourTV-Independent/app/build/outputs/apk/debug/app-debug.apk &&
-            adb wait-for-device &&
-            for i in $(seq 1 90); do adb shell cmd package list packages >/dev/null 2>&1 && break; sleep 2; done &&
-            adb shell cmd package list packages >/dev/null &&
-            adb install -r source/CleanYourTV-Independent/app/build/outputs/apk/debug/app-debug.apk &&
-            adb shell am start -n ae.cleanyourtv.independent/.MainActivity &&
-            sleep 15 &&
-            adb shell pidof ae.cleanyourtv.independent &&
-            adb shell screencap -p /sdcard/dalati-home.png &&
-            adb pull /sdcard/dalati-home.png dalati-home-emulator.png &&
+          script: |
+            set -euo pipefail
+            APK="source/CleanYourTV-Independent/app/build/outputs/apk/debug/app-debug.apk"
+            ADB="${ANDROID_HOME}/platform-tools/adb"
+            test -s "$APK"
+            "$ADB" start-server
+            "$ADB" wait-for-device
+            echo "ADB devices:"
+            "$ADB" devices -l
+            ready=0
+            for i in $(seq 1 120); do
+              state="$("$ADB" get-state 2>/dev/null || true)"
+              if [ "$state" = "device" ] && "$ADB" shell service check package 2>/dev/null | grep -q found; then
+                ready=1
+                break
+              fi
+              "$ADB" reconnect offline >/dev/null 2>&1 || true
+              sleep 2
+            done
+            if [ "$ready" -ne 1 ]; then
+              echo "Android package manager did not become ready."
+              "$ADB" devices -l || true
+              "$ADB" logcat -d -t 250 || true
+              exit 1
+            fi
+            installed=0
+            for i in $(seq 1 4); do
+              if "$ADB" install -r "$APK"; then installed=1; break; fi
+              echo "Install attempt $i failed; waiting for package manager."
+              sleep 5
+            done
+            test "$installed" -eq 1
+            "$ADB" shell am start -W -n ae.cleanyourtv.independent/.MainActivity
+            sleep 15
+            "$ADB" shell pidof ae.cleanyourtv.independent
+            "$ADB" exec-out screencap -p > dalati-home-emulator.png
             test -s dalati-home-emulator.png
+            file dalati-home-emulator.png
 
       - name: Upload Android TV emulator screenshot
+        if: always() && hashFiles('dalati-home-emulator.png') != ''
         uses: actions/upload-artifact@v4
         with:
           name: Dalati-TV-v21-emulator-smoke
@@ -89,6 +115,7 @@ jobs:
           if-no-files-found: error
 
       - name: Verify APK package and launcher manifest
+        if: always()
         working-directory: source/CleanYourTV-Independent
         shell: bash
         run: |
@@ -105,6 +132,7 @@ jobs:
           sha256sum "$APK" | tee app/build/outputs/apk/debug/SHA256SUMS.txt
 
       - name: Upload APK artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Dalati-TV-v21-debug-APK
@@ -114,6 +142,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload patched source for full review
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Dalati-TV-v21-patched-source-review
