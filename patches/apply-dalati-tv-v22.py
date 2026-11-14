@@ -40,6 +40,17 @@ method = r'''    private void readOfficialPrayerPage() {
                 }
 
                 Pattern arabicNext = Pattern.compile("الصلاة\\s*القادمة\\s*[:：]?\\s*(الفجر|الظهر|العصر|المغرب|العشاء)\\s*(?:خلال\\s*)?(\\d{1,2}:\\d{2}:\\d{2})?");
+                // Some AWQAF page builds render the remaining time as prose rather than HH:MM:SS.
+                Pattern englishRemaining = Pattern.compile("(?i)Next\\s*prayer\\s*[:：]?\\s*(Fajr|Zuhr|Dhuhr|Asr|Maghrib|Isha).*?In\\s+(?:(\\d+)\\s+Hours?)?\\s*(?:(\\d+)\\s+Minutes?)?\\s*(?:(\\d+)\\s+Seconds?)?");
+                Matcher er = englishRemaining.matcher(body);
+                if (er.find() && (er.group(2) != null || er.group(3) != null || er.group(4) != null)) {
+                    nextPrayerLabel = arabicPrayerName(er.group(1));
+                    prayerRemainingSeconds = (er.group(2)==null?0:Integer.parseInt(er.group(2))*3600L)
+                        + (er.group(3)==null?0:Integer.parseInt(er.group(3))*60L)
+                        + (er.group(4)==null?0:Integer.parseInt(er.group(4)));
+                    updatePrayerCard();
+                    return;
+                }
                 Matcher am = arabicNext.matcher(body);
                 if (am.find() && am.group(2) != null) {
                     nextPrayerLabel = am.group(1);
