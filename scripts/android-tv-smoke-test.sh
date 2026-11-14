@@ -53,6 +53,10 @@ echo "Dalati TV process: $PID"
 test -s "$GITHUB_WORKSPACE/dalati-home-emulator.png"
 file "$GITHUB_WORKSPACE/dalati-home-emulator.png"
 sleep 8
-"$ADB" logcat -d -s DalatiPrayer:I DalatiPrayer:E DalatiWeather:E > "$GITHUB_WORKSPACE/dalati-live-data-diagnostics.log" || true
+# Clear prior boot noise, allow delayed WebView callbacks, then capture every level.
+"$ADB" logcat -c
+sleep 25
+"$ADB" logcat -d -v threadtime -s DalatiPrayer:V DalatiWeather:V > "$GITHUB_WORKSPACE/dalati-live-data-diagnostics.log" || true
+echo "Diagnostic log lines: $(wc -l < "$GITHUB_WORKSPACE/dalati-live-data-diagnostics.log")"
 cat "$GITHUB_WORKSPACE/dalati-live-data-diagnostics.log"
 
