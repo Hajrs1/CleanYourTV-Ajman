@@ -46,7 +46,8 @@ test "$installed" -eq 1
 # Isolate app startup diagnostics before launching the activity.
 "$ADB" logcat -c
 "$ADB" shell am start -W -n ae.cleanyourtv.independent/.MainActivity
-sleep 15
+# Allow the AWQAF WebView to finish its delayed JavaScript rendering before capture.
+sleep 35
 PID="$("$ADB" shell pidof ae.cleanyourtv.independent | tr -d '\r')"
 test -n "$PID"
 echo "Dalati TV process: $PID"
@@ -54,9 +55,7 @@ echo "Dalati TV process: $PID"
 "$ADB" exec-out screencap -p > "$GITHUB_WORKSPACE/dalati-home-emulator.png"
 test -s "$GITHUB_WORKSPACE/dalati-home-emulator.png"
 file "$GITHUB_WORKSPACE/dalati-home-emulator.png"
-sleep 8
-# Allow delayed WebView callbacks, then capture every diagnostic level.
-sleep 25
+# Capture every diagnostic level after the screenshot.
 "$ADB" logcat -d -v threadtime -s DalatiPrayer:V DalatiWeather:V > "$GITHUB_WORKSPACE/dalati-live-data-diagnostics.log" || true
 echo "Diagnostic log lines: $(wc -l < "$GITHUB_WORKSPACE/dalati-live-data-diagnostics.log")"
 cat "$GITHUB_WORKSPACE/dalati-live-data-diagnostics.log"
