@@ -70,19 +70,16 @@ jobs:
           script: >-
             set -euo pipefail &&
             test -s source/CleanYourTV-Independent/app/build/outputs/apk/debug/app-debug.apk &&
+            adb wait-for-device &&
             for i in $(seq 1 90); do adb shell cmd package list packages >/dev/null 2>&1 && break; sleep 2; done &&
             adb shell cmd package list packages >/dev/null &&
             adb install -r source/CleanYourTV-Independent/app/build/outputs/apk/debug/app-debug.apk &&
             adb shell am start -n ae.cleanyourtv.independent/.MainActivity &&
-            sleep 12 &&
+            sleep 15 &&
             adb shell pidof ae.cleanyourtv.independent &&
             adb shell screencap -p /sdcard/dalati-home.png &&
             adb pull /sdcard/dalati-home.png dalati-home-emulator.png &&
-            test -s dalati-home-emulator.png &&
-            adb shell input keyevent 20 &&
-            adb shell input keyevent 22 &&
-            adb shell input keyevent 23 &&
-            sleep 2
+            test -s dalati-home-emulator.png
 
       - name: Upload Android TV emulator screenshot
         uses: actions/upload-artifact@v4
