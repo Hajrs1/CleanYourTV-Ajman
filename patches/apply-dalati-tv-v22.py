@@ -5,6 +5,25 @@ root = Path("source/CleanYourTV-Independent")
 java = root / "app/src/main/java/ae/cleanyourtv/independent/MainActivity.java"
 s = java.read_text(encoding="utf-8")
 
+# Make favorite-app fallback marks recognizable and consistent when an app is absent
+# from the Android TV emulator. Installed apps continue to use their native icons.
+s=s.replace('''        if(!"apps".equals(packageName))try{ResolveInfo ri=findAppInfo(packageName,label);if(ri!=null){image.setImageDrawable(ri.loadIcon(getPackageManager()));found=true;}else{image.setImageDrawable(getPackageManager().getApplicationIcon(packageName));found=true;}}catch(Exception ignored){}''',
+'''        if(!"apps".equals(packageName) && !"com.android.vending".equals(packageName))try{ResolveInfo ri=findAppInfo(packageName,label);if(ri!=null){image.setImageDrawable(ri.loadIcon(getPackageManager()));found=true;}else{image.setImageDrawable(getPackageManager().getApplicationIcon(packageName));found=true;}}catch(Exception ignored){}''',1)
+s=s.replace('''        else{TextView g=text(fallbackIcon,38,Color.WHITE,true);g.setGravity(Gravity.CENTER);tile.addView(g,new LinearLayout.LayoutParams(dp(72),dp(72)));}''',
+'''        else{
+            int markColor=Color.WHITE; int markSize=38; String mark=fallbackIcon;
+            if("com.netflix.ninja".equals(packageName)){mark="N";markColor=Color.rgb(229,9,20);markSize=54;}
+            else if("com.disney.disneyplus".equals(packageName)){mark="D+";markColor=Color.WHITE;markSize=42;}
+            else if("com.amazon.amazonvideo.livingroom".equals(packageName)){mark="prime";markColor=Color.rgb(0,168,225);markSize=28;}
+            else if("com.mbc.shahid".equals(packageName)){mark="شاهد";markColor=Color.rgb(230,190,95);markSize=30;}
+            else if("com.spotify.tv.android".equals(packageName)){mark="≋";markColor=Color.rgb(30,215,96);markSize=54;}
+            else if("com.android.vending".equals(packageName)){mark="▶";markColor=Color.rgb(52,168,83);markSize=48;}
+            TextView g=text(mark,markSize,markColor,true);g.setGravity(Gravity.CENTER);
+            if("com.amazon.amazonvideo.livingroom".equals(packageName))g.setTypeface(android.graphics.Typeface.create("sans-serif",android.graphics.Typeface.BOLD));
+            tile.addView(g,new LinearLayout.LayoutParams(dp(72),dp(72)));
+        }''',1)
+
+
 # Fix the fixture separator: Java must receive a newline escape, not a literal backslash+n.
 s=s.replace(r'+"\\n"+localFixture', r'+"\n"+localFixture', 1)
 
