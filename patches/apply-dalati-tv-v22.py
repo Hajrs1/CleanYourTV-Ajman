@@ -154,6 +154,17 @@ s=s.replace('''            } catch(Exception e) { runOnUiThread(() -> {
                 weatherSnapshot = "الطقس في عجمان غير متاح حاليًا";''',1)
 s=s.replace('section.equals("weather")?36:24','section.equals("weather")?20:24',1)
 
+# Keep the prayer card's name and countdown fields live; remove the stale static foot placeholder.
+s=s.replace('refCard(info,"الصلاة القادمة","العشاء","--:--","--:--:--","prayer",1.58f)',
+            'refCard(info,"الصلاة القادمة","بانتظار بيانات الهيئة","--:--:--","","prayer",1.58f)', 1)
+s=s.replace('''        if(screensaverPrayerView!=null) screensaverPrayerView.setText(nextPrayerLabel);
+    }''',
+'''        if(screensaverPrayerView!=null) screensaverPrayerView.setText(nextPrayerLabel);
+        android.util.Log.i("DalatiPrayer","UI updated: nameView="+(prayerMainView==null?"null":prayerMainView.getText())+
+            " summaryView="+(prayerSummary==null?"null":prayerSummary.getText())+
+            " ringView="+(mainCountdownView==null?"null":mainCountdownView.getText()));
+    }''', 1)
+
 java.write_text(s, encoding="utf-8")
 
 gradle = root / "app/build.gradle"
