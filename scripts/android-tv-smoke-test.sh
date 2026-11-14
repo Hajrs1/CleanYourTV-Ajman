@@ -52,3 +52,7 @@ echo "Dalati TV process: $PID"
 "$ADB" exec-out screencap -p > "$GITHUB_WORKSPACE/dalati-home-emulator.png"
 test -s "$GITHUB_WORKSPACE/dalati-home-emulator.png"
 file "$GITHUB_WORKSPACE/dalati-home-emulator.png"
+sleep 8
+"$ADB" logcat -d -s DalatiPrayer:I DalatiPrayer:E DalatiWeather:E > "$GITHUB_WORKSPACE/dalati-live-data-diagnostics.log" || true
+cat "$GITHUB_WORKSPACE/dalati-live-data-diagnostics.log"
+
