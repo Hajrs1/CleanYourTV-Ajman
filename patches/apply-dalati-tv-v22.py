@@ -8,6 +8,22 @@ s = java.read_text(encoding="utf-8")
 # Fix the fixture separator: Java must receive a newline escape, not a literal backslash+n.
 s=s.replace(r'+"\\n"+localFixture', r'+"\n"+localFixture', 1)
 
+# Instrument the weather request so transient network/HTTP failures are distinguishable from parsing/UI failures.
+s=s.replace('''                con=(HttpURLConnection)url.openConnection(); con.setRequestMethod("GET"); con.setConnectTimeout(9000); con.setReadTimeout(9000);
+                BufferedReader r=new BufferedReader(new InputStreamReader(con.getInputStream(),"UTF-8")); StringBuilder b=new StringBuilder(); String line; while((line=r.readLine())!=null)b.append(line); r.close();''',
+'''                android.util.Log.i("DalatiWeather","Open-Meteo request started: "+url);
+                con=(HttpURLConnection)url.openConnection(); con.setRequestMethod("GET"); con.setConnectTimeout(15000); con.setReadTimeout(15000);
+                int httpStatus=con.getResponseCode();
+                android.util.Log.i("DalatiWeather","Open-Meteo HTTP status="+httpStatus+" contentType="+con.getContentType());
+                if(httpStatus<200 || httpStatus>=300) throw new java.io.IOException("Open-Meteo HTTP "+httpStatus+" "+con.getResponseMessage());
+                BufferedReader r=new BufferedReader(new InputStreamReader(con.getInputStream(),"UTF-8")); StringBuilder b=new StringBuilder(); String line; while((line=r.readLine())!=null)b.append(line); r.close();
+                android.util.Log.i("DalatiWeather","Open-Meteo response bytes="+b.length());''',1)
+s=s.replace('''            } catch(Exception e) { runOnUiThread(() -> {
+                weatherSnapshot = "الطقس في عجمان غير متاح حاليًا";''',
+'''            } catch(Exception e) {
+                android.util.Log.e("DalatiWeather","Open-Meteo request or parsing failed",e);
+                runOnUiThread(() -> {
+                weatherSnapshot = "الطقس في عجمان غير متاح حاليًا";''',1)
 # Give the dashboard information cards enough vertical room for their actual contents.
 s = s.replace('root.addView(info,new LinearLayout.LayoutParams(-1,dp(190)));',
               'root.addView(info,new LinearLayout.LayoutParams(-1,dp(220)));', 1)
