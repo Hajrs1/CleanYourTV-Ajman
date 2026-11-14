@@ -99,7 +99,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Dalati-TV-v22-emulator-smoke
-          path: dalati-home-emulator.png
+          path: |
+            dalati-home-emulator.png
+            dalati-live-data-diagnostics.log
           if-no-files-found: error
 
       - name: Verify APK package and launcher manifest
