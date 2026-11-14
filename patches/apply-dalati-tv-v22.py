@@ -6,7 +6,7 @@ java = root / "app/src/main/java/ae/cleanyourtv/independent/MainActivity.java"
 s = java.read_text(encoding="utf-8")
 
 # Fix the fixture separator: Java must receive a newline escape, not a literal backslash+n.
-s=s.replace(r'+"\\\\n"+localFixture', r'+"\\n"+localFixture', 1)
+s=s.replace(r'+"\\n"+localFixture', r'+"\n"+localFixture', 1)
 
 # Give the dashboard information cards enough vertical room for their actual contents.
 s = s.replace('root.addView(info,new LinearLayout.LayoutParams(-1,dp(190)));',
