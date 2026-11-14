@@ -66,7 +66,7 @@ jobs:
           arch: x86_64
           profile: tv_1080p
           disable-animations: true
-          emulator-options: -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect
+          emulator-options: -no-window -no-audio -no-boot-anim -no-snapshot -wipe-data -memory 4096 -gpu swiftshader_indirect
           script: |
             set -euo pipefail
             APK=source/CleanYourTV-Independent/app/build/outputs/apk/debug/app-debug.apk
@@ -86,7 +86,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Dalati-TV-v20-emulator-smoke
+          name: Dalati-TV-v21-emulator-smoke
           path: dalati-home-emulator.png
           if-no-files-found: ignore
 
@@ -109,7 +109,7 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Dalati-TV-v20-debug-APK
+          name: Dalati-TV-v21-debug-APK
           path: |
             source/CleanYourTV-Independent/app/build/outputs/apk/debug/app-debug.apk
             source/CleanYourTV-Independent/app/build/outputs/apk/debug/SHA256SUMS.txt
@@ -118,6 +118,6 @@ jobs:
       - name: Upload patched source for full review
         uses: actions/upload-artifact@v4
         with:
-          name: Dalati-TV-v20-patched-source-review
+          name: Dalati-TV-v21-patched-source-review
           path: source/CleanYourTV-Independent/
           if-no-files-found: error
