@@ -154,6 +154,12 @@ s=s.replace('''            } catch(Exception e) { runOnUiThread(() -> {
                 weatherSnapshot = "الطقس في عجمان غير متاح حاليًا";''',1)
 s=s.replace('section.equals("weather")?36:24','section.equals("weather")?20:24',1)
 
+# Put the prayer name in the compact line and the live countdown in the larger main value area.
+s=s.replace('''        if(prayerMainView!=null) prayerMainView.setText(nextPrayerLabel);
+        if(prayerSummary!=null) prayerSummary.setText(countdown);''',
+'''        if(prayerMainView!=null) prayerMainView.setText(countdown);
+        if(prayerSummary!=null) prayerSummary.setText(nextPrayerLabel);''',1)
+
 # Keep the prayer card's name and countdown fields live; remove the stale static foot placeholder.
 s=s.replace('refCard(info,"الصلاة القادمة","العشاء","--:--","--:--:--","prayer",1.58f)',
             'refCard(info,"الصلاة القادمة","بانتظار بيانات الهيئة","--:--:--","","prayer",1.58f)', 1)
