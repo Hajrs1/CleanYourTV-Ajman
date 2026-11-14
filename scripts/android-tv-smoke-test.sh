@@ -43,6 +43,8 @@ for i in $(seq 1 4); do
 done
 test "$installed" -eq 1
 
+# Isolate app startup diagnostics before launching the activity.
+"$ADB" logcat -c
 "$ADB" shell am start -W -n ae.cleanyourtv.independent/.MainActivity
 sleep 15
 PID="$("$ADB" shell pidof ae.cleanyourtv.independent | tr -d '\r')"
@@ -53,8 +55,7 @@ echo "Dalati TV process: $PID"
 test -s "$GITHUB_WORKSPACE/dalati-home-emulator.png"
 file "$GITHUB_WORKSPACE/dalati-home-emulator.png"
 sleep 8
-# Clear prior boot noise, allow delayed WebView callbacks, then capture every level.
-"$ADB" logcat -c
+# Allow delayed WebView callbacks, then capture every diagnostic level.
 sleep 25
 "$ADB" logcat -d -v threadtime -s DalatiPrayer:V DalatiWeather:V > "$GITHUB_WORKSPACE/dalati-live-data-diagnostics.log" || true
 echo "Diagnostic log lines: $(wc -l < "$GITHUB_WORKSPACE/dalati-live-data-diagnostics.log")"
