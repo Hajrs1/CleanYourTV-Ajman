@@ -1,5 +1,5 @@
 # Dalati TV verified Android TV build workflow
-name: Build Dalati TV APK v21
+name: Build Dalati TV APK v22
 
 on:
   workflow_dispatch:
@@ -31,6 +31,7 @@ jobs:
           python3 patches/apply-dalati-tv-v18.py
           python3 patches/apply-dalati-tv-v20.py
           python3 patches/apply-dalati-tv-v21.py
+          python3 patches/apply-dalati-tv-v22.py
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -97,7 +98,7 @@ jobs:
         if: always() && hashFiles('dalati-home-emulator.png') != ''
         uses: actions/upload-artifact@v4
         with:
-          name: Dalati-TV-v21-emulator-smoke
+          name: Dalati-TV-v22-emulator-smoke
           path: dalati-home-emulator.png
           if-no-files-found: error
 
@@ -111,7 +112,7 @@ jobs:
           test -s "$APK"
           AAPT="$ANDROID_HOME/build-tools/34.0.0/aapt"
           "$AAPT" dump badging "$APK" | tee /tmp/apk-badging.txt
-          grep -Fq "package: name='ae.cleanyourtv.independent' versionCode='21' versionName='0.21.0-preview'" /tmp/apk-badging.txt
+          grep -Fq "package: name='ae.cleanyourtv.independent' versionCode='22' versionName='0.22.0-preview'" /tmp/apk-badging.txt
           "$AAPT" dump xmltree "$APK" AndroidManifest.xml > /tmp/apk-manifest.txt
           grep -Fq 'android.intent.category.HOME' /tmp/apk-manifest.txt
           grep -Fq 'android.intent.category.DEFAULT' /tmp/apk-manifest.txt
@@ -122,7 +123,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Dalati-TV-v21-debug-APK
+          name: Dalati-TV-v22-debug-APK
           path: |
             source/CleanYourTV-Independent/app/build/outputs/apk/debug/app-debug.apk
             source/CleanYourTV-Independent/app/build/outputs/apk/debug/SHA256SUMS.txt
@@ -132,6 +133,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Dalati-TV-v21-patched-source-review
+          name: Dalati-TV-v22-patched-source-review
           path: source/CleanYourTV-Independent/
           if-no-files-found: error
