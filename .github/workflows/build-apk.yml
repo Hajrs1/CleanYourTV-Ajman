@@ -58,6 +58,15 @@ jobs:
         working-directory: source/CleanYourTV-Independent
         run: gradle --no-daemon --stacktrace assembleDebug
 
+      - name: Stage APK for emulator smoke test
+        working-directory: source/CleanYourTV-Independent
+        run: |
+          set -euo pipefail
+          test -s app/build/outputs/apk/debug/app-debug.apk
+          install -D app/build/outputs/apk/debug/app-debug.apk "$GITHUB_WORKSPACE/dalati-tv-smoke.apk"
+          test -s "$GITHUB_WORKSPACE/dalati-tv-smoke.apk"
+          sha256sum "$GITHUB_WORKSPACE/dalati-tv-smoke.apk"
+
       - name: Enable KVM permissions for Android emulator
         run: |
           set -euo pipefail
@@ -84,9 +93,8 @@ jobs:
           emulator-options: -no-window -no-audio -no-boot-anim -no-snapshot -wipe-data -memory 4096 -gpu swiftshader_indirect
           script: |
             set -euo pipefail
-            APK="$(find "$GITHUB_WORKSPACE" -type f -path "*/app/build/outputs/apk/debug/app-debug.apk" -print -quit)"
+            APK="$GITHUB_WORKSPACE/dalati-tv-smoke.apk"
             ADB="${ANDROID_HOME}/platform-tools/adb"
-            if [ -z "$APK" ]; then echo "Built APK not found under $GITHUB_WORKSPACE"; find "$GITHUB_WORKSPACE" -path "*/build/outputs/apk/*" -type f -print; exit 1; fi
             echo "Using APK: $APK"
             test -s "$APK"
             "$ADB" start-server
