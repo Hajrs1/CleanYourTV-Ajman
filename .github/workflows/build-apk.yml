@@ -59,7 +59,6 @@ jobs:
 
       - name: Android TV emulator smoke test
         uses: reactivecircus/android-emulator-runner@v2
-        continue-on-error: true
         with:
           api-level: 30
           target: google_apis
@@ -83,12 +82,11 @@ jobs:
             adb logcat -d -t 2000 | grep -E 'FATAL EXCEPTION|AndroidRuntime' && exit 1 || true
 
       - name: Upload Android TV emulator screenshot
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Dalati-TV-v21-emulator-smoke
           path: dalati-home-emulator.png
-          if-no-files-found: ignore
+          if-no-files-found: error
 
       - name: Verify APK package and launcher manifest
         working-directory: source/CleanYourTV-Independent
