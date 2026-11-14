@@ -48,3 +48,10 @@ method = r'''    private LinearLayout refCard(LinearLayout row,String title,Stri
 s=s[:a]+method+s[b:]
 s=s.replace("versionCode 20","versionCode 21").replace("versionName '0.20.0-preview'","versionName '0.21.0-preview'")
 java.write_text(s,encoding="utf-8")
+
+# Keep APK metadata aligned with the applied UI patch.
+gradle = root / "app/build.gradle"
+g = gradle.read_text(encoding="utf-8")
+g = g.replace("versionCode 20", "versionCode 21").replace("versionName '0.20.0-preview'", "versionName '0.21.0-preview'")
+gradle.write_text(g, encoding="utf-8")
+print("Dalati TV v21 version metadata applied.")
