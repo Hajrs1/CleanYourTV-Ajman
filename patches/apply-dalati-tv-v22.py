@@ -8,6 +8,10 @@ s = java.read_text(encoding="utf-8")
 # Fix the fixture separator: Java must receive a newline escape, not a literal backslash+n.
 s=s.replace(r'+"\\n"+localFixture', r'+"\n"+localFixture', 1)
 
+# render() already starts the initial weather fetch; avoid launching a duplicate request in onCreate().
+s=s.replace('render(); updateClock(); handler.post(ticker); resetIdleTimer(); loadWeather();',
+            'render(); updateClock(); handler.post(ticker); resetIdleTimer();', 1)
+
 # Instrument the weather request so transient network/HTTP failures are distinguishable from parsing/UI failures.
 s=s.replace('''                con=(HttpURLConnection)url.openConnection(); con.setRequestMethod("GET"); con.setConnectTimeout(9000); con.setReadTimeout(9000);
                 BufferedReader r=new BufferedReader(new InputStreamReader(con.getInputStream(),"UTF-8")); StringBuilder b=new StringBuilder(); String line; while((line=r.readLine())!=null)b.append(line); r.close();''',
